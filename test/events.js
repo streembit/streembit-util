@@ -60,5 +60,10 @@ describe("Event handler", function () {
             let result = events.appinit();
             expect(result).to.equal(true);
         });
+
+        it("taskinit should return true", function () {
+            let result = events.taskinit();
+            expect(result).to.equal(true);
+        });
     });
 });

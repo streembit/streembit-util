@@ -54,6 +54,11 @@ class EventHandler extends EventEmitter {
         this.emit(this.APP_INIT);
         return true;
     }
+
+    taskinit(task, payload) {
+        this.emit(this.TASK_INIT, task, payload);
+        return true;
+    }
 }
 
 module.exports = EventHandler.instance;
