@@ -1,0 +1,13 @@
+{
+ "name": "streembit-util",
+ "version": "1.0.1",
+ "description": "Streembit utility modules",
+ "main": "index.js",
+ "author": {
+  "name": "T Z Pardi",
+  "email": "tzpardi@streembit.com"
+ },
+ "dependencies": {
+  "winston": "^2.4.0"
+ }
+}
