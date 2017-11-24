@@ -41,6 +41,7 @@ class EventHandler extends EventEmitter {
         this.TASK_INIT = "task-init";
         this.ONIOTEVENT = "on-iotevent";
         this.ONBCEVENT = "on-bcevent";
+        this.ONERROREVENT = "on-errorevent";
     }
 
     static get instance() {
