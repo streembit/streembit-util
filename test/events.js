@@ -94,25 +94,37 @@ describe("Event handler", function () {
             expect(result).to.equal(true);
         });
 
-        it("onpeerreq should call an event listener", function () {
+        it("onappinit should call an event listener", function (done) {
+            events.register(
+                events.ONAPPINIT,
+                (result) => {
+                    expect(result).to.equal(true);
+                    done();
+                }
+            );
+            events.appinit();            
+        });
+
+        it("onpeerreq should call an event listener", function (done) {
             let payload = "1";
             events.register(
                 events.ONPEERREQUEST,
                 (data) =>{
                     expect(data).to.equal(payload);
+                    done();
                 }
             );
             events.peerrequest(payload);            
         });
 
-        it("ontask should call an event listener", function () {
+        it("ontask should call an event listener", function (done) {
             let t = "T";
             let payload = "1";
             events.register(
                 events.ONTASK,
                 (task, data) => {
-                    expect(task).to.equal(t);
-                    expect(data).to.equal(payload);
+                    assert.equal(true, (data == payload && task == t));
+                    done();
                 }
             );
             events.taskinit(t, payload);            

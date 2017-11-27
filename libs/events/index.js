@@ -45,9 +45,11 @@ class EventHandler extends EventEmitter {
         this.ONERROREVENT = "on-errorevent";
 
         this.clients = new Map();
+        this.clients.set(this.ONAPPINIT, []);
         this.clients.set(this.ONPEERREQUEST, []);
         this.clients.set(this.ONTASK, []);
 
+        this.onappinit();
         this.onpeerreq();
         this.ontask();
     }
@@ -87,6 +89,17 @@ class EventHandler extends EventEmitter {
     taskinit(task, payload) {
         this.emit(this.ONTASK, task, payload);
         return true;
+    }
+
+    onappinit(callback){
+        this.on(this.ONAPPINIT, () => {
+            let callbacks = this.clients.get(this.ONAPPINIT);            
+            callbacks.forEach(
+                (callback)=>{
+                    callback(true);
+                }                
+            );
+        });
     }
 
     onpeerreq(callback){
