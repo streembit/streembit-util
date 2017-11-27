@@ -37,8 +37,8 @@ describe("Event handler", function () {
             assert.equal(true, (typeof events.ONAPPINIT == 'string' && events.ONAPPINIT.length > 0) );
         });
 
-        it("event type APPLOG exists", function () {
-            assert.equal(true, (typeof events.APPLOG == 'string' && events.APPLOG.length > 0));
+        it("event type ONAPPLOG exists", function () {
+            assert.equal(true, (typeof events.ONAPPLOG == 'string' && events.ONAPPLOG.length > 0));
         });
 
         it("event type ONTASK exists", function () {
@@ -53,6 +53,9 @@ describe("Event handler", function () {
             assert.equal(true, (typeof events.ONBCEVENT == 'string' && events.ONBCEVENT.length > 0));
         });
 
+        it("event type ONPEERREQUEST exists", function () {
+            assert.equal(true, (typeof events.ONPEERREQUEST == 'string' && events.ONPEERREQUEST.length > 0));
+        });
     });
 
     describe("Event functions", function () {
@@ -61,9 +64,58 @@ describe("Event handler", function () {
             expect(result).to.equal(true);
         });
 
+        it("register should throw exception with invalid event name", function () {
+            function reg(){
+                events.register("0");
+            }            
+            expect(reg).to.throw(); 
+        });
+
+        it("register should throw exception with invalid event callback", function () {
+            function reg(){
+                events.register(events.ONPEERREQUEST);
+            }
+            expect(reg).to.throw(); 
+        });
+
+        it("register should return true", function () {
+            let result = events.register(events.ONPEERREQUEST, function(payload){
+            });
+            expect(result).to.equal(true);
+        });
+
         it("taskinit should return true", function () {
             let result = events.taskinit();
             expect(result).to.equal(true);
+        });
+
+        it("peerrequest should return true", function () {
+            let result = events.peerrequest();
+            expect(result).to.equal(true);
+        });
+
+        it("onpeerreq should call an event listener", function () {
+            let payload = "1";
+            events.register(
+                events.ONPEERREQUEST,
+                (data) =>{
+                    expect(data).to.equal(payload);
+                }
+            );
+            events.peerrequest(payload);            
+        });
+
+        it("ontask should call an event listener", function () {
+            let t = "T";
+            let payload = "1";
+            events.register(
+                events.ONTASK,
+                (task, data) => {
+                    expect(task).to.equal(t);
+                    expect(data).to.equal(payload);
+                }
+            );
+            events.taskinit(t, payload);            
         });
     });
 });

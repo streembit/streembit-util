@@ -34,14 +34,22 @@ class EventHandler extends EventEmitter {
         }
 
         // call the events constructor
-        super();
+        super();   
 
-        this.ONAPPINIT = "app-init";
-        this.APPLOG = "app-log";
-        this.ONTASK = "task-init";
+        this.ONAPPINIT = "on-app-init";
+        this.ONAPPLOG = "on-app-log";
+        this.ONTASK = "on-task-init";
         this.ONIOTEVENT = "on-iotevent";
+        this.ONPEERREQUEST = "on-peer-reqest"; 
         this.ONBCEVENT = "on-bcevent";
         this.ONERROREVENT = "on-errorevent";
+
+        this.clients = new Map();
+        this.clients.set(this.ONPEERREQUEST, []);
+        this.clients.set(this.ONTASK, []);
+
+        this.onpeerreq();
+        this.ontask();
     }
 
     static get instance() {
@@ -51,14 +59,56 @@ class EventHandler extends EventEmitter {
         return this[singleton];
     }
 
+    register(event, callback){
+        if(!event ){
+            throw new Error("Error in registering event client, event name is required");
+        }
+        var list_of_callbacks = this.clients.get(event);
+        if(!list_of_callbacks ){
+            throw new Error("Error in registering event client, invalid event name");
+        }
+        if(!callback || typeof callback != "function" ){
+            throw new Error("Error in registering event client, invalid callback");
+        }
+        list_of_callbacks.push(callback);
+        return true;
+    }
+
     appinit() {
         this.emit(this.ONAPPINIT);
+        return true;
+    }
+
+    peerrequest(payload){
+        this.emit(this.ONPEERREQUEST, payload);
         return true;
     }
 
     taskinit(task, payload) {
         this.emit(this.ONTASK, task, payload);
         return true;
+    }
+
+    onpeerreq(callback){
+        this.on(this.ONPEERREQUEST, (payload) => {
+            let callbacks = this.clients.get(this.ONPEERREQUEST);            
+            callbacks.forEach(
+                (callback)=>{
+                    callback(payload);
+                }                
+            );            
+        });
+    }
+
+    ontask(callback){
+        this.on(this.ONTASK, (task, payload) => {
+            let callbacks = this.clients.get(this.ONTASK);            
+            callbacks.forEach(
+                (callback)=>{
+                    callback(task, payload);
+                }                
+            );
+        });
     }
 }
 
