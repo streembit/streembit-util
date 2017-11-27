@@ -36,9 +36,9 @@ class EventHandler extends EventEmitter {
         // call the events constructor
         super();
 
-        this.APP_INIT = "app-init";
+        this.ONAPPINIT = "app-init";
         this.APPLOG = "app-log";
-        this.TASK_INIT = "task-init";
+        this.ONTASK = "task-init";
         this.ONIOTEVENT = "on-iotevent";
         this.ONBCEVENT = "on-bcevent";
         this.ONERROREVENT = "on-errorevent";
@@ -52,12 +52,12 @@ class EventHandler extends EventEmitter {
     }
 
     appinit() {
-        this.emit(this.APP_INIT);
+        this.emit(this.ONAPPINIT);
         return true;
     }
 
     taskinit(task, payload) {
-        this.emit(this.TASK_INIT, task, payload);
+        this.emit(this.ONTASK, task, payload);
         return true;
     }
 }

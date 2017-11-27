@@ -33,16 +33,16 @@ describe("Event handler", function () {
     });
 
     describe("Event types", function () {
-        it("event type APP_INIT exists", function () {
-            assert.equal(true, (typeof events.APP_INIT == 'string' && events.APP_INIT.length > 0) );
+        it("event type ONAPPINIT exists", function () {
+            assert.equal(true, (typeof events.ONAPPINIT == 'string' && events.ONAPPINIT.length > 0) );
         });
 
         it("event type APPLOG exists", function () {
             assert.equal(true, (typeof events.APPLOG == 'string' && events.APPLOG.length > 0));
         });
 
-        it("event type TASK_INIT exists", function () {
-            assert.equal(true, (typeof events.TASK_INIT == 'string' && events.TASK_INIT.length > 0));
+        it("event type ONTASK exists", function () {
+            assert.equal(true, (typeof events.ONTASK == 'string' && events.ONTASK.length > 0));
         });
 
         it("event type ONIOTEVENT exists", function () {
