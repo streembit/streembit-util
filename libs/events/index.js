@@ -40,17 +40,17 @@ class EventHandler extends EventEmitter {
         this.ONAPPLOG = "on-app-log";
         this.ONTASK = "on-task-init";
         this.ONIOTEVENT = "on-iotevent";
-        this.ONPEERREQUEST = "on-peer-reqest"; 
+        this.ONPEERMSG = "on-peer-msg"; 
         this.ONBCEVENT = "on-bcevent";
         this.ONERROREVENT = "on-errorevent";
 
         this.clients = new Map();
         this.clients.set(this.ONAPPINIT, []);
-        this.clients.set(this.ONPEERREQUEST, []);
+        this.clients.set(this.ONPEERMSG, []);
         this.clients.set(this.ONTASK, []);
 
         this.onappinit();
-        this.onpeerreq();
+        this.onpeermsg();
         this.ontask();
     }
 
@@ -81,8 +81,8 @@ class EventHandler extends EventEmitter {
         return true;
     }
 
-    peerrequest(payload){
-        this.emit(this.ONPEERREQUEST, payload);
+    peermsg(payload, req, res){
+        this.emit(this.ONPEERMSG, payload, req, res);
         return true;
     }
 
@@ -102,12 +102,12 @@ class EventHandler extends EventEmitter {
         });
     }
 
-    onpeerreq(callback){
-        this.on(this.ONPEERREQUEST, (payload) => {
-            let callbacks = this.clients.get(this.ONPEERREQUEST);            
+    onpeermsg(callback){
+        this.on(this.ONPEERMSG, (payload, req, res) => {
+            let callbacks = this.clients.get(this.ONPEERMSG);            
             callbacks.forEach(
                 (callback)=>{
-                    callback(payload);
+                    callback(payload, req, res);
                 }                
             );            
         });
