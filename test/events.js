@@ -94,6 +94,11 @@ describe("Event handler", function () {
             expect(result).to.equal(true);
         });
 
+        it("iotmsg should return true", function () {
+            let result = events.iotmsg();
+            expect(result).to.equal(true);
+        });
+
         it("onappinit should call an event listener", function (done) {
             events.register(
                 events.ONAPPINIT,
@@ -130,6 +135,19 @@ describe("Event handler", function () {
                 }
             );
             events.taskinit(t, payload);            
+        });
+
+        it("oniotmsg should call an event listener", function (done) {
+            let payload = "P";
+            let fn = function(){};
+            events.register(
+                events.ONIOTEVENT,
+                (data, cb) => {
+                    assert.equal(true, (data == payload && cb == fn));
+                    done();
+                }
+            );
+            events.iotmsg( payload, fn);            
         });
     });
 });

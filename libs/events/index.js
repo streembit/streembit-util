@@ -48,10 +48,12 @@ class EventHandler extends EventEmitter {
         this.clients.set(this.ONAPPINIT, []);
         this.clients.set(this.ONPEERMSG, []);
         this.clients.set(this.ONTASK, []);
+        this.clients.set(this.ONIOTEVENT, []);
 
         this.onappinit();
         this.onpeermsg();
         this.ontask();
+        this.oniotmsg();
     }
 
     static get instance() {
@@ -91,7 +93,12 @@ class EventHandler extends EventEmitter {
         return true;
     }
 
-    onappinit(callback){
+    iotmsg(payload, callback) {
+        this.emit(this.ONIOTEVENT, payload,callback);
+        return true;
+    }
+
+    onappinit(){
         this.on(this.ONAPPINIT, () => {
             let callbacks = this.clients.get(this.ONAPPINIT);            
             callbacks.forEach(
@@ -102,7 +109,7 @@ class EventHandler extends EventEmitter {
         });
     }
 
-    onpeermsg(callback){
+    onpeermsg(){
         this.on(this.ONPEERMSG, (payload, req, res) => {
             let callbacks = this.clients.get(this.ONPEERMSG);            
             callbacks.forEach(
@@ -113,12 +120,23 @@ class EventHandler extends EventEmitter {
         });
     }
 
-    ontask(callback){
+    ontask(){
         this.on(this.ONTASK, (task, payload) => {
             let callbacks = this.clients.get(this.ONTASK);            
             callbacks.forEach(
                 (callback)=>{
                     callback(task, payload);
+                }                
+            );
+        });
+    }
+
+    oniotmsg(){
+        this.on(this.ONIOTEVENT, (payload, handlerfn) => {
+            let callbacks = this.clients.get(this.ONIOTEVENT);            
+            callbacks.forEach(
+                (callback)=>{
+                    callback(payload, handlerfn);
                 }                
             );
         });
