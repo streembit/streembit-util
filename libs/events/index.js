@@ -83,8 +83,8 @@ class EventHandler extends EventEmitter {
         return true;
     }
 
-    peermsg(payload, req, res){
-        this.emit(this.ONPEERMSG, payload, req, res);
+    peermsg(payload, req, res, msgid, completefn){
+        this.emit(this.ONPEERMSG, payload, req, res, msgid, completefn);
         return true;
     }
 
@@ -110,11 +110,11 @@ class EventHandler extends EventEmitter {
     }
 
     onpeermsg(){
-        this.on(this.ONPEERMSG, (payload, req, res) => {
+        this.on(this.ONPEERMSG, (payload, req, res, msgid, completefn) => {
             let callbacks = this.clients.get(this.ONPEERMSG);            
             callbacks.forEach(
                 (callback)=>{
-                    callback(payload, req, res);
+                    callback(payload, req, res, msgid, completefn);
                 }                
             );            
         });

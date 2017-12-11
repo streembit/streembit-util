@@ -114,14 +114,20 @@ describe("Event handler", function () {
             let payload = "1";
             let request = "req";
             let response = "resp";
+            let id = 1;
+            let completefn = function(id){
+                console.log("completefn for id " + id)
+            }
+
             events.register(
                 events.ONPEERMSG,
-                (data, req, resp) => {
-                    assert.equal(true, (data == payload && request == req && resp == response));
+                (data, req, resp, msgid, compfn) => {
+                    compfn(msgid);
+                    assert.equal(true, (data == payload && request == req && resp == response && msgid == id));
                     done();
                 }
             );
-            events.peermsg(payload, request, response);            
+            events.peermsg(payload, request, response, id, completefn);            
         });
 
         it("ontask should call an event listener", function (done) {
