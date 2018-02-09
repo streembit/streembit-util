@@ -56,6 +56,10 @@ describe("Event handler", function () {
         it("event type ONPEERMSG exists", function () {
             assert.equal(true, (typeof events.ONPEERMSG == 'string' && events.ONPEERMSG.length > 0));
         });
+
+        it("event type ONBCEVENT exists", function () {
+            assert.equal(true, (typeof events.ONBCEVENT == 'string' && events.ONBCEVENT.length > 0));
+        });
     });
 
     describe("Event functions", function () {
@@ -96,6 +100,11 @@ describe("Event handler", function () {
 
         it("iotmsg should return true", function () {
             let result = events.iotmsg();
+            expect(result).to.equal(true);
+        });
+
+        it("bcmsg should return true", function () {
+            let result = events.bcmsg();
             expect(result).to.equal(true);
         });
 
@@ -154,6 +163,19 @@ describe("Event handler", function () {
                 }
             );
             events.iotmsg( payload, fn);            
+        });
+
+        it("onbcmsg should call an event listener", function (done) {
+            let payload = "BC";
+            let fn = function(){};
+            events.register(
+                events.ONBCEVENT,
+                (data, cb) => {
+                    assert.equal(true, (data == payload && cb == fn));
+                    done();
+                }
+            );
+            events.bcmsg( payload, fn);            
         });
     });
 });

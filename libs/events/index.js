@@ -49,11 +49,13 @@ class EventHandler extends EventEmitter {
         this.clients.set(this.ONPEERMSG, []);
         this.clients.set(this.ONTASK, []);
         this.clients.set(this.ONIOTEVENT, []);
+        this.clients.set(this.ONBCEVENT, []);
 
         this.onappinit();
         this.onpeermsg();
         this.ontask();
         this.oniotmsg();
+        this.onbcmsg();
     }
 
     static get instance() {
@@ -98,6 +100,11 @@ class EventHandler extends EventEmitter {
         return true;
     }
 
+    bcmsg(payload, callback) {
+        this.emit(this.ONBCEVENT, payload, callback);
+        return true;
+    }
+
     onappinit(){
         this.on(this.ONAPPINIT, () => {
             let callbacks = this.clients.get(this.ONAPPINIT);            
@@ -134,6 +141,17 @@ class EventHandler extends EventEmitter {
     oniotmsg(){
         this.on(this.ONIOTEVENT, (payload, handlerfn) => {
             let callbacks = this.clients.get(this.ONIOTEVENT);            
+            callbacks.forEach(
+                (callback)=>{
+                    callback(payload, handlerfn);
+                }                
+            );
+        });
+    }
+
+    onbcmsg(){
+        this.on(this.ONBCEVENT, (payload, handlerfn) => {
+            let callbacks = this.clients.get(this.ONBCEVENT);            
             callbacks.forEach(
                 (callback)=>{
                     callback(payload, handlerfn);
