@@ -29,7 +29,7 @@ const util = require('util');
 
 
 let singleton = Symbol();
-let singletonEnforcer = Symbol()
+let singletonEnforcer = Symbol();
 
 class Logger {
     constructor(enforcer) {
@@ -158,24 +158,30 @@ class Logger {
         }
     }
 
-    configure(loglevel, logpath, excpath) {
-        var transports = [
-            new winston.transports.Console({
-                level: loglevel,
-                json: false,
-                colorize: true
-            }),
-            new (winston.transports.File)({
-                filename: logpath,
-                level: loglevel,
-                json: true,
-                maxsize: 4096000, //4MB
-                maxFiles: 100,
-                tailable: true,
-                colorize: false
-            })
-        ];
-
+    configure(loglevel, logpath, excpath, trans) {
+        var transports = [];
+        if (trans.indexOf('console') > -1) {
+            transports.push(
+                new winston.transports.Console({
+                    level: loglevel,
+                    json: false,
+                    colorize: true
+                })
+            );
+        }
+        if (trans.indexOf('file') > -1) {
+            transports.push(
+                new (winston.transports.File)({
+                    filename: logpath,
+                    level: loglevel,
+                    json: true,
+                    maxsize: 4096000, //4MB
+                    maxFiles: 100,
+                    tailable: true,
+                    colorize: false
+                })
+            );
+        }
 
         this.logger = new (winston.Logger)({
             exitOnError: false,
@@ -194,7 +200,7 @@ class Logger {
         });
     }
 
-    init (loglevel, logdir) {
+    init (loglevel, logdir, transport = ['console', 'file']) {
         if (!logdir) {
             var wdir = process.cwd();
             logdir = path.join(wdir, "logs");
@@ -222,15 +228,10 @@ class Logger {
             return console.log("Error in renaming log file: " + e.message);
         }
 
-        this.configure(loglevel || "debug", logfile, path.join(logdir, 'exception.log'));
+        this.configure(loglevel || "debug", logfile, path.join(logdir, 'exception.log'), transport);
 
         this.logger.info("logfile: " + logfile);
     }
 }
 
 module.exports = Logger.instance;
-
-
-
-
-
