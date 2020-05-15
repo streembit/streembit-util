@@ -100,3 +100,4 @@ launch.json*
 
 .vs/streembit-util/config/applicationhost.config
 testapp.js
+package-lock.json

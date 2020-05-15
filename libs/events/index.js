@@ -29,7 +29,7 @@ let singletonEnforcer = Symbol()
 
 class EventHandler extends EventEmitter {
     constructor(enforcer) {
-        if (enforcer != singletonEnforcer) {
+        if (enforcer !== singletonEnforcer) {
             throw "Cannot construct singleton";
         }
 
@@ -37,8 +37,9 @@ class EventHandler extends EventEmitter {
         super();   
 
         this.ONAPPINIT = "on-app-init";
+        this.ONAPPEVENT = "on-appevent";
         this.ONAPPLOG = "on-app-log";
-        this.ONTASK = "on-task-init";
+        this.ONTASKINIT = "on-task-init";
         this.ONIOTEVENT = "on-iotevent";
         this.ONPEERMSG = "on-peer-msg"; 
         this.ONBCEVENT = "on-bcevent";
@@ -46,14 +47,16 @@ class EventHandler extends EventEmitter {
 
         this.clients = new Map();
         this.clients.set(this.ONAPPINIT, []);
+        this.clients.set(this.ONAPPEVENT, []);
         this.clients.set(this.ONPEERMSG, []);
-        this.clients.set(this.ONTASK, []);
+        this.clients.set(this.ONTASKINIT, []);
         this.clients.set(this.ONIOTEVENT, []);
         this.clients.set(this.ONBCEVENT, []);
 
         this.onappinit();
+        this.onappevent();
         this.onpeermsg();
-        this.ontask();
+        this.ontaskinit();
         this.oniotmsg();
         this.onbcmsg();
     }
@@ -73,7 +76,7 @@ class EventHandler extends EventEmitter {
         if(!list_of_callbacks ){
             throw new Error("Error in registering event client, invalid event name");
         }
-        if(!callback || typeof callback != "function" ){
+        if(!callback || typeof callback !== "function" ){
             throw new Error("Error in registering event client, invalid callback");
         }
         list_of_callbacks.push(callback);
@@ -85,13 +88,18 @@ class EventHandler extends EventEmitter {
         return true;
     }
 
+    appevent() {
+        this.emit(this.ONAPPEVENT);
+        return true;
+    }
+
     peermsg(payload, req, res, msgid, completefn){
         this.emit(this.ONPEERMSG, payload, req, res, msgid, completefn);
         return true;
     }
 
     taskinit(task, payload) {
-        this.emit(this.ONTASK, task, payload);
+        this.emit(this.ONTASKINIT, task, payload);
         return true;
     }
 
@@ -116,6 +124,17 @@ class EventHandler extends EventEmitter {
         });
     }
 
+    onappevent() {
+        this.on(this.ONAPPEVENT, () => {
+            let callbacks = this.clients.get(this.ONAPPEVENT);
+            callbacks.forEach(
+                (callback) => {
+                    callback(true);
+                }
+            );
+        });
+    }
+
     onpeermsg(){
         this.on(this.ONPEERMSG, (payload, req, res, msgid, completefn) => {
             let callbacks = this.clients.get(this.ONPEERMSG);            
@@ -127,9 +146,9 @@ class EventHandler extends EventEmitter {
         });
     }
 
-    ontask(){
-        this.on(this.ONTASK, (task, payload) => {
-            let callbacks = this.clients.get(this.ONTASK);            
+    ontaskinit(){
+        this.on(this.ONTASKINIT, (task, payload) => {
+            let callbacks = this.clients.get(this.ONTASKINIT);            
             callbacks.forEach(
                 (callback)=>{
                     callback(task, payload);

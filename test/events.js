@@ -34,37 +34,46 @@ describe("Event handler", function () {
 
     describe("Event types", function () {
         it("event type ONAPPINIT exists", function () {
-            assert.equal(true, (typeof events.ONAPPINIT == 'string' && events.ONAPPINIT.length > 0) );
+            assert.equal(true, (typeof events.ONAPPINIT === 'string' && events.ONAPPINIT.length > 0) );
+        });
+
+        it("event type ONAPPEVENT exists", function () {
+            assert.equal(true, (typeof events.ONAPPEVENT === 'string' && events.ONAPPEVENT.length > 0));
         });
 
         it("event type ONAPPLOG exists", function () {
-            assert.equal(true, (typeof events.ONAPPLOG == 'string' && events.ONAPPLOG.length > 0));
+            assert.equal(true, (typeof events.ONAPPLOG === 'string' && events.ONAPPLOG.length > 0));
         });
 
-        it("event type ONTASK exists", function () {
-            assert.equal(true, (typeof events.ONTASK == 'string' && events.ONTASK.length > 0));
+        it("event type ONTASKINIT exists", function () {
+            assert.equal(true, (typeof events.ONTASKINIT === 'string' && events.ONTASKINIT.length > 0));
         });
 
         it("event type ONIOTEVENT exists", function () {
-            assert.equal(true, (typeof events.ONIOTEVENT == 'string' && events.ONIOTEVENT.length > 0));
+            assert.equal(true, (typeof events.ONIOTEVENT === 'string' && events.ONIOTEVENT.length > 0));
         });
 
         it("event type ONBCEVENT exists", function () {
-            assert.equal(true, (typeof events.ONBCEVENT == 'string' && events.ONBCEVENT.length > 0));
+            assert.equal(true, (typeof events.ONBCEVENT === 'string' && events.ONBCEVENT.length > 0));
         });
 
         it("event type ONPEERMSG exists", function () {
-            assert.equal(true, (typeof events.ONPEERMSG == 'string' && events.ONPEERMSG.length > 0));
+            assert.equal(true, (typeof events.ONPEERMSG === 'string' && events.ONPEERMSG.length > 0));
         });
 
         it("event type ONBCEVENT exists", function () {
-            assert.equal(true, (typeof events.ONBCEVENT == 'string' && events.ONBCEVENT.length > 0));
+            assert.equal(true, (typeof events.ONBCEVENT === 'string' && events.ONBCEVENT.length > 0));
         });
     });
 
     describe("Event functions", function () {
         it("appinit should return true", function () {
             let result = events.appinit();
+            expect(result).to.equal(true);
+        });
+
+        it("appevent should return true", function () {
+            let result = events.appevent();
             expect(result).to.equal(true);
         });
 
@@ -119,6 +128,17 @@ describe("Event handler", function () {
             events.appinit();            
         });
 
+        it("onappevent should call an event listener", function (done) {
+            events.register(
+                events.ONAPPEVENT,
+                (result) => {
+                    expect(result).to.equal(true);
+                    done();
+                }
+            );
+            events.appevent();
+        });
+
         it("onpeermsg should call an event listener", function (done) {
             let payload = "1";
             let request = "req";
@@ -132,20 +152,20 @@ describe("Event handler", function () {
                 events.ONPEERMSG,
                 (data, req, resp, msgid, compfn) => {
                     compfn(msgid);
-                    assert.equal(true, (data == payload && request == req && resp == response && msgid == id));
+                    assert.equal(true, (data === payload && request === req && resp === response && msgid === id));
                     done();
                 }
             );
             events.peermsg(payload, request, response, id, completefn);            
         });
 
-        it("ontask should call an event listener", function (done) {
+        it("ontaskinit should call an event listener", function (done) {
             let t = "T";
             let payload = "1";
             events.register(
-                events.ONTASK,
+                events.ONTASKINIT,
                 (task, data) => {
-                    assert.equal(true, (data == payload && task == t));
+                    assert.equal(true, (data === payload && task === t));
                     done();
                 }
             );
@@ -158,7 +178,7 @@ describe("Event handler", function () {
             events.register(
                 events.ONIOTEVENT,
                 (data, cb) => {
-                    assert.equal(true, (data == payload && cb == fn));
+                    assert.equal(true, (data === payload && cb === fn));
                     done();
                 }
             );
@@ -171,11 +191,12 @@ describe("Event handler", function () {
             events.register(
                 events.ONBCEVENT,
                 (data, cb) => {
-                    assert.equal(true, (data == payload && cb == fn));
+                    assert.equal(true, (data === payload && cb === fn));
                     done();
                 }
             );
             events.bcmsg( payload, fn);            
         });
+
     });
 });
