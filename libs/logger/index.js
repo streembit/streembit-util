@@ -33,7 +33,7 @@ let singletonEnforcer = Symbol();
 
 class Logger {
     constructor(enforcer) {
-        if (enforcer != singletonEnforcer) {
+        if (enforcer !== singletonEnforcer) {
             throw "Cannot construct singleton";
         }
 
@@ -65,19 +65,19 @@ class Logger {
 
             if (param) {
                 var msg = err;
-                if (typeof err == 'string') {
+                if (typeof err === 'string') {
                     if (err.indexOf("%j") > -1) {
                         //  the Error object is not formated well from the util library
-                        //  send only the message field if that is an Eror object
-                        if (param.message && (typeof param == "Error" || typeof param == "error" || typeof param == "object" || typeof param == "Object")) {
+                        //  send only the message field if that is an Error object
+                        if (param.message && (typeof param === Error || typeof param === Object)) {
                             err = err.replace("%j", "%s");
                             msg = util.format(err, param.message);
                         }
-                        else if (typeof param == 'string') {
+                        else if (typeof param === 'string') {
                             err = err.replace("%j", "%s");
                             msg = util.format(err, param);
                         }
-                        else if (typeof param == 'number') {
+                        else if (typeof param === 'number') {
                             err = err.replace("%j", "%d");
                             msg = util.format(err, param);
                         }
@@ -109,19 +109,19 @@ class Logger {
     level_log(level, msg, val1, val2, val3, val4) {
         try {
             if (msg) {
-                if (val1 != undefined && val2 != undefined && val3 != undefined && val4 != undefined) {
+                if (val1 !== undefined && val2 !== undefined && val3 !== undefined && val4 !== undefined) {
                     msg = util.format(msg, val1, val2, val3, val4);
                     this.logmsg(level, msg);
                 }
-                else if (val1 != undefined && val2 != undefined && val3 != undefined) {
+                else if (val1 !== undefined && val2 !== undefined && val3 !== undefined) {
                     msg = util.format(msg, val1, val2, val3);
                     this.logmsg(level, msg);
                 }
-                else if (val1 != undefined && val2 != undefined) {
+                else if (val1 !== undefined && val2 !== undefined) {
                     msg = util.format(msg, val1, val2);
                     this.logmsg(level, msg);
                 }
-                else if (val1 != undefined) {
+                else if (val1 !== undefined) {
                     msg = util.format(msg, val1);
                     this.logmsg(level, msg);
                 }
@@ -183,7 +183,7 @@ class Logger {
             );
         }
 
-        this.logger = new (winston.Logger)({
+        this.logger = winston.createLogger({
             exitOnError: false,
             transports: transports,
             exceptionHandlers: [

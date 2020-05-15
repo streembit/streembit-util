@@ -98,3 +98,4 @@ streembit-util.njsproj.user
 temp.js*
 launch.json*
 
+.vs/streembit-util/config/applicationhost.config
