@@ -21,8 +21,8 @@ Copyright (C) 2017 The Streembit software development team
 
 'use strict';
 
-var events = require("./libs/events");
-var logger = require("./libs/logger");
+const events = require("./libs/events");
+const logger = require("./libs/logger");
 
 module.exports.events = events;
 module.exports.logger = logger;

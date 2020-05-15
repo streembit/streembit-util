@@ -165,7 +165,12 @@ class Logger {
                 new winston.transports.Console({
                     level: loglevel,
                     json: false,
-                    colorize: true
+                    //colorize: true,
+                    //format: winston.format.simple()
+                    format: winston.format.combine(
+                        winston.format.colorize(),
+                        winston.format.simple()
+                    )
                 })
             );
         }
@@ -174,11 +179,11 @@ class Logger {
                 new (winston.transports.File)({
                     filename: logpath,
                     level: loglevel,
-                    json: true,
-                    maxsize: 4096000, //4MB
+                    maxsize: 4096000, // 4MB
                     maxFiles: 100,
                     tailable: true,
-                    colorize: false
+                    colorize: false,
+                    format: winston.format.json()
                 })
             );
         }
@@ -187,17 +192,11 @@ class Logger {
             exitOnError: false,
             transports: transports,
             exceptionHandlers: [
-                new winston.transports.File({
-                    filename: excpath,
-                    json: true
-                }),
-                new winston.transports.Console({
-                    level: loglevel,
-                    json: false,
-                    colorize: true
-                })
+                new winston.transports.File({ filename: excpath }),
+                new winston.transports.Console()
             ]
         });
+
     }
 
     init (loglevel, logdir, transport = ['console', 'file']) {
