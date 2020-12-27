@@ -25,6 +25,7 @@ Copyright (C) 2017 The Streembit software development team
 const path = require('path');
 const fs = require('fs');
 const winston = require('winston');
+const { createLogger, transports } = require('winston');
 const util = require('util');
 
 
@@ -159,14 +160,12 @@ class Logger {
     }
 
     configure(loglevel, logpath, excpath, trans) {
-        var transports = [];
+        var winston_transports = [];
         if (trans.indexOf('console') > -1) {
-            transports.push(
-                new winston.transports.Console({
+            winston_transports.push(
+                new transports.Console({
                     level: loglevel,
                     json: false,
-                    //colorize: true,
-                    //format: winston.format.simple()
                     format: winston.format.combine(
                         winston.format.colorize(),
                         winston.format.simple()
@@ -174,9 +173,10 @@ class Logger {
                 })
             );
         }
+
         if (trans.indexOf('file') > -1) {
-            transports.push(
-                new (winston.transports.File)({
+            winston_transports.push(
+                new transports.File ({
                     filename: logpath,
                     level: loglevel,
                     maxsize: 4096000, // 4MB
@@ -188,48 +188,61 @@ class Logger {
             );
         }
 
-        this.logger = winston.createLogger({
+        var logconfig = {
             exitOnError: false,
-            transports: transports,
+            transports: winston_transports,
             exceptionHandlers: [
-                new winston.transports.File({ filename: excpath }),
-                new winston.transports.Console()
+                new transports.Console()
             ]
-        });
+        };
+        if (trans.indexOf('file') > -1) {
+            logconfig.exceptionHandlers.push(new transports.File({ filename: excpath })); 
+        }
 
+        this.logger = createLogger(logconfig);
     }
 
-    init (loglevel, logdir, transport = ['console', 'file']) {
-        if (!logdir) {
-            var wdir = process.cwd();
-            logdir = path.join(wdir, "logs");
-        }
-        // get logfile path
-        var logfile = path.join(logdir, 'streembit.log');
+    init(loglevel, logdir, transport = ['console', 'file']) {
 
-        // create logs directory, if not exists
-        try {
-            if (!fs.existsSync(logdir)) {
-                fs.mkdirSync(logdir);
+        var logfile = null;
+        var exception_path = null;
+
+        if (transport.indexOf('file') > -1) {
+            if (!logdir) {
+                var wdir = process.cwd();
+                logdir = path.join(wdir, "logs");
             }
-        }
-        catch (e) {
-            return console.log("Error in creating logs directory: " + e.message);
-        }
+            // get logfile path
+            logfile = path.join(logdir, 'streembit.log');
 
-        // rename log file, if exists
-        try {
-            if (fs.existsSync(logfile)) {
-                fs.renameSync(logfile, path.join(logdir, "/streembit_" + Date.now() + ".log"));
+            // create logs directory, if not exists
+            try {
+                if (!fs.existsSync(logdir)) {
+                    fs.mkdirSync(logdir);
+                }
             }
-        }
-        catch (e) {
-            return console.log("Error in renaming log file: " + e.message);
+            catch (e) {
+                return console.log("Error in creating logs directory: " + e.message);
+            }
+
+            // rename log file, if exists
+            try {
+                if (fs.existsSync(logfile)) {
+                    fs.renameSync(logfile, path.join(logdir, "/streembit_" + Date.now() + ".log"));
+                }
+            }
+            catch (e) {
+                return console.log("Error in renaming log file: " + e.message);
+            }
+
+            exception_path = path.join(logdir, 'exception.log');
         }
 
-        this.configure(loglevel || "debug", logfile, path.join(logdir, 'exception.log'), transport);
+        this.configure(loglevel || "debug", logfile, exception_path, transport);
 
-        this.logger.info("logfile: " + logfile);
+        if (transport.indexOf('file') > -1) {
+            this.logger.info("logfile: " + logfile);
+        }
     }
 }
 
