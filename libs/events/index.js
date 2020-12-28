@@ -88,8 +88,8 @@ class EventHandler extends EventEmitter {
         return true;
     }
 
-    appevent() {
-        this.emit(this.ONAPPEVENT);
+    appevent(payload) {
+        this.emit(this.ONAPPEVENT, payload);
         return true;
     }
 
@@ -125,11 +125,11 @@ class EventHandler extends EventEmitter {
     }
 
     onappevent() {
-        this.on(this.ONAPPEVENT, () => {
+        this.on(this.ONAPPEVENT, (payload) => {
             let callbacks = this.clients.get(this.ONAPPEVENT);
             callbacks.forEach(
                 (callback) => {
-                    callback(true);
+                    callback(payload);
                 }
             );
         });

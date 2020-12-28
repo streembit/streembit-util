@@ -128,15 +128,16 @@ describe("Event handler", function () {
             events.appinit();            
         });
 
-        it("onappevent should call an event listener", function (done) {
+        it("onappevent should call an event listener and return the object that 'num' value is 1", function (done) {
+            let data = {num: 1}
             events.register(
                 events.ONAPPEVENT,
                 (result) => {
-                    expect(result).to.equal(true);
+                    expect(result.num).to.equal(1);
                     done();
                 }
             );
-            events.appevent();
+            events.appevent(data);
         });
 
         it("onpeermsg should call an event listener", function (done) {
