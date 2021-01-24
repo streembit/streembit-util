@@ -1,6 +1,6 @@
 {
   "name": "streembit-util",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Streembit utility modules",
   "main": "index.js",
   "license": "SEE LICENSE IN LICENSE",
@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/streembit/streembit-util.git"
   },
-  "author": "Tibor Pardi <tzpardi@streembit.com>",
+  "author": "Zovolt Ltd, UK <tzpardi@streembit.com>",
   "dependencies": {
     "chai": "^4.2.0",
     "mocha": "^7.1.2",

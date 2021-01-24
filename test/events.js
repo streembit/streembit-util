@@ -64,6 +64,10 @@ describe("Event handler", function () {
         it("event type ONBCEVENT exists", function () {
             assert.equal(true, (typeof events.ONBCEVENT === 'string' && events.ONBCEVENT.length > 0));
         });
+
+        it("event type ONERROREVENT exists", function () {
+            assert.equal(true, (typeof events.ONERROREVENT === 'string' && events.ONERROREVENT.length > 0));
+        });
     });
 
     describe("Event functions", function () {
@@ -117,6 +121,11 @@ describe("Event handler", function () {
             expect(result).to.equal(true);
         });
 
+        it("errorevent should return true", function () {
+            let result = events.errorevent();
+            expect(result).to.equal(true);
+        });
+
         it("onappinit should call an event listener", function (done) {
             events.register(
                 events.ONAPPINIT,
@@ -145,8 +154,8 @@ describe("Event handler", function () {
             let request = "req";
             let response = "resp";
             let id = 1;
-            let completefn = function(id){
-                console.log("completefn for id " + id)
+            let completefn = (id) =>{
+                assert.equal(true, id === 1);
             }
 
             events.register(
@@ -197,6 +206,19 @@ describe("Event handler", function () {
                 }
             );
             events.bcmsg( payload, fn);            
+        });
+
+        it("errorevent should call an event listener", function (done) {
+            let err = new Error("test error");
+            let payload = {data: 1} ;
+            events.register(
+                events.ONERROREVENT,
+                (e, p) => {
+                    assert.equal(true, (e.message === "test error" && p.data === 1));
+                    done();
+                }
+            );
+            events.errorevent(err, payload);
         });
 
     });

@@ -52,6 +52,7 @@ class EventHandler extends EventEmitter {
         this.clients.set(this.ONTASKINIT, []);
         this.clients.set(this.ONIOTEVENT, []);
         this.clients.set(this.ONBCEVENT, []);
+        this.clients.set(this.ONERROREVENT, []);
 
         this.onappinit();
         this.onappevent();
@@ -59,6 +60,7 @@ class EventHandler extends EventEmitter {
         this.ontaskinit();
         this.oniotmsg();
         this.onbcmsg();
+        this.onerror();
     }
 
     static get instance() {
@@ -110,6 +112,11 @@ class EventHandler extends EventEmitter {
 
     bcmsg(payload, callback) {
         this.emit(this.ONBCEVENT, payload, callback);
+        return true;
+    }
+
+    errorevent(err, payload) {
+        this.emit(this.ONERROREVENT, err, payload);
         return true;
     }
 
@@ -175,6 +182,17 @@ class EventHandler extends EventEmitter {
                 (callback)=>{
                     callback(payload, handlerfn);
                 }                
+            );
+        });
+    }
+
+    onerror() {
+        this.on(this.ONERROREVENT, (err, payload) => {
+            let callbacks = this.clients.get(this.ONERROREVENT);
+            callbacks.forEach(
+                (callback) => {
+                    callback(err, payload);
+                }
             );
         });
     }
