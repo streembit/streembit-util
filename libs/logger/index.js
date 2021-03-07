@@ -195,6 +195,7 @@ class Logger {
                 new transports.Console()
             ]
         };
+
         if (trans.indexOf('file') > -1) {
             logconfig.exceptionHandlers.push(new transports.File({ filename: excpath })); 
         }
@@ -202,7 +203,7 @@ class Logger {
         this.logger = createLogger(logconfig);
     }
 
-    init(loglevel, logdir, transport = ['console', 'file']) {
+    init(loglevel, logdir, transport = ['console']) {
 
         var logfile = null;
         var exception_path = null;
