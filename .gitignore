@@ -80,6 +80,7 @@ data/*.json
 *.ldb
 *.dat
 *.db
+*.vsidx
 
 /.vs/config/applicationhost.config
 
