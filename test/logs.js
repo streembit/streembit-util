@@ -26,29 +26,96 @@ const path = require('path');
 const fs = require('fs');
 const logger = require("../index").logger;
 
-describe("Logger", function () {
+after(() => {
 
-    describe("init()", function () {
-        it("init() should execute", function () {
-            logger.init("debug", ["file"]);
+    setTimeout(
+        () => {
+            var wdir = process.cwd();
+            var logdir = path.join(wdir, "logs");
+            //var logfile = path.join(logdir, 'streembit.log');
+            //fs.rmSync("*.log");
+            const files = fs.readdirSync(logdir);
+            for (const file of files) {
+                const filePath = path.join(logdir, file);
+                fs.rmSync(filePath);
+            }
+        },
+        1000
+    );
+
+});
+
+describe("Logger",  () => {
+
+    describe("init()",  () => {
+        it("init() should thrown an exception when the opts is not defined", () => {
+            assert.throws(() => {
+                logger.init();
+            });
         });
 
-        it("Log file 'streembit.log' should exists for transport type 'file'", function () {   
+        it("init() should thrown an exception when the loglevel in opts is not defined", () => {
+            assert.throws(() => {
+                const opt = {}
+                logger.init(opt);
+            });
+        });
+
+        it("init() should thrown an exception when the loglevel in opts is an invalid value", () => {
+            assert.throws(() => {
+                const opt = { loglevel: "nothing"}
+                logger.init(opt);
+            });
+        });
+
+        it("init() should thrown an exception when the transport in opts is an invalid value", () => {
+            assert.throws(() => {
+                const opt = { loglevel: "debug" }
+                logger.init(opt);
+            });
+        });
+
+        it("init() should thrown an exception when the logtail transport does not include a logtail_token variable", () => {
+            assert.throws(() => {
+                const opt = {
+                    loglevel: "debug",
+                    logtail: {a: "b"}
+                }
+                logger.init(opt);
+            });
+        });
+
+        it("init() should execute when the log level is debug and the transport is console",  () => {
+            const opts = {
+                loglevel: "debug",
+                console: {}
+            };
+            logger.init(opts);
+        });
+
+
+        it("The log test.log must exist when the file.logfile parameter is defined", () => {
+            const logfile = "test.log";
+            const opts = {
+                loglevel: "debug",
+                file: { logfile: logfile }
+            };
+            logger.init(opts);
             setTimeout(
                 () => {
                     var wdir = process.cwd();
                     var logdir = path.join(wdir, "logs");
-                    var logfile = path.join(logdir, 'streembit.log');
-                    var exist = fs.existsSync(logfile);
+                    var logfile_path = path.join(logdir, logfile);
+                    var exist = fs.existsSync(logfile_path);
                     expect(exist).to.equal(true);
                 },
-                500
+                100
             );
         });
     });
 
-    describe("Functions", function () {
-        it("function debug() should not throw exception", function () {     
+    describe("Logger level functions", () => {
+        it("Function debug() should not throw exception",  () => {     
             var iserr = false;
             try {
                 logger.debug("debug test");
@@ -59,7 +126,7 @@ describe("Logger", function () {
             assert.equal(false, iserr);
         });
 
-        it("function info() should not throw exception", function () {
+        it("Function info() should not throw exception",  () => {
             var iserr = false;
             try {
                 logger.info("info test");
@@ -70,7 +137,7 @@ describe("Logger", function () {
             assert.equal(false, iserr);
         });
 
-        it("function warn() should not throw exception", function () {
+        it("Function warn() should not throw exception",  () => {
             var iserr = false;
             try {
                 logger.warn("warn test");
@@ -81,7 +148,7 @@ describe("Logger", function () {
             assert.equal(false, iserr);
         });
 
-        it("function error() should not throw exception", function () {
+        it("Function error() should not throw exception",  () => {
             var iserr = false;
             try {
                 logger.error("error test");

@@ -166,14 +166,14 @@ class Logger {
         }
     }
 
-    configure(loglevel, trans, params) {
+    configure(params) {
 
         var winston_transports = [];
 
-        if (trans.indexOf('console') > -1) {
+        if (params.console !== undefined) {
             winston_transports.push(
                 new transports.Console({
-                    level: loglevel,
+                    level: params.loglevel,
                     json: false,
                     format: winston.format.combine(
                         winston.format.colorize(),
@@ -184,40 +184,38 @@ class Logger {
             );
         }
 
-        if (trans.indexOf('file') > -1) {
-            if (!params || !params.logpath) {
-                console.log("Failed to initialize file log. Error: the params.logpath parameter is required.")
+        if (params.file !== undefined) {
+            if (!params.file.logfile_path) {
+                throw new Error("Failed to initialize file log: the params.logpath parameter is required.")
             }
-            else {
-                winston_transports.push(
-                    new transports.File({
-                        filename: params.logpath,
-                        level: loglevel,
-                        maxsize: 4096000, // 4MB
-                        maxFiles: 100,
-                        tailable: true,
-                        colorize: false,
-                        format: winston.format.json(),
-                        handleExceptions: true
-                    })
-                );
-            }            
+           
+            winston_transports.push(
+                new transports.File({
+                    filename: params.file.logfile_path,
+                    level: params.loglevel,
+                    maxsize: 4096000, // 4MB
+                    maxFiles: 100,
+                    tailable: true,
+                    colorize: false,
+                    format: winston.format.json(),
+                    handleExceptions: true
+                })
+            );                     
         }
 
-        if (trans.indexOf('logtail') > -1) {
-            if (!params.logtail_token) {
-                console.log("Failed to initialize file log. Error: logtail requires a token.")
+        if (params.logtail !== undefined ) {
+            if (!params.logtail.logtail_token) {
+                throw new Error("Failed to initialize logtail log: logtail logger mode requires a token.")
             }
-            else {
-                // Create a Logtail client
-                this.logtail = new Logtail(params.logtail_token);
-                const logtail_trans = new LogtailTransport(this.logtail);
-                winston_transports.push(
-                    logtail_trans 
-                );
-                // set the logtail flag
-                this.islogtail = true;
-            }            
+            
+            // Create a Logtail client
+            this.logtail = new Logtail(params.logtail.logtail_token);
+            const logtail_trans = new LogtailTransport(this.logtail, { level: params.loglevel });
+            winston_transports.push(
+                logtail_trans 
+            );
+            // set the logtail flag
+            this.islogtail = true;
         }
 
         var logconfig = {
@@ -225,25 +223,49 @@ class Logger {
             exitOnError: false
         };
 
-        //if (trans.indexOf('file') > -1) {
-        //    logconfig.exceptionHandlers.push(new transports.File({ filename: excpath })); 
-        //}
-
         this.logger = createLogger(logconfig);
     }
 
-    init(loglevel, transports = ['console'], opts = {}) {
+    validate_loglevel(level) {
+        // Winston loglevels:
+        // error: 0,
+        // warn: 1,
+        // info: 2,
+        // http: 3,
+        // verbose: 4,
+        // debug: 5,
+        // silly: 6
+        if (level !== 'error' && level !== 'warn' && level !== 'info' && level !== 'http'
+            && level !== 'verbose' && level !== 'debug' && level !== 'silly') {
+            throw new Error("The opts.loglevel variable must be a valid log level");
+        }
+    }
 
-        var params = {};
+    init(opts) {
 
-        if (transports.indexOf('file') > -1) {
+        if (!opts) {
+            throw new Error("The opts parameter is required")
+        }
+
+        if (!opts.loglevel) {
+            throw new Error("The loglevel variable in the opts parameter is required")
+        }
+
+        // validate the loglevel, it will thrown an exception if the loglevel isn't valid
+        this.validate_loglevel(opts.loglevel);
+
+        if (opts.console === undefined && opts.file === undefined && opts.logtail === undefined) {
+            throw new Error("The transport in opts parameter is required")
+        }
+ 
+        if (opts.file !== undefined) {
             var logdir;
-            if (!opts.logdir) {
+            if (!opts.file.logdir) {
                 var wdir = process.cwd();
                 logdir = path.join(wdir, "logs");
             }
             else {
-                logdir = opts.logdir;
+                logdir = opts.file.logdir;
             }
 
             // create logs directory, if not exists
@@ -253,6 +275,7 @@ class Logger {
                 }
             }
             catch (e) {
+                // return a useful message instead of throwing an exception
                 return console.log("Error in creating logs directory: " + e.message);
             }
 
@@ -268,10 +291,11 @@ class Logger {
                 fs.rmSync(testfile_path);
             }
             catch (e) {
+                // return a useful message instead of throwing an exception so the write issue is evident for tha caller
                 return console.log("Error in writing to the logs directory: " + e.message);
             }
             
-            var logf = opts.logfile  || 'streembit.log';
+            var logf = opts.file.logfile  || 'streembit.log';
             // get the logfile path
             var logfile_path = path.join(logdir, logf);            
 
@@ -282,23 +306,23 @@ class Logger {
                 }
             }
             catch (e) {
+                // return a useful message instead of throwing an exception 
                 return console.log("Error in renaming log file: " + e.message);
             }
 
-            params.logpath = logfile_path;
+            opts.file.logfile_path = logfile_path;
         }
 
-        if (transports.indexOf('logtail') > -1) {
-            if (!opts.logtail_token) {
-                return console.log("Error in creating logger: logtail token is required for logtail log type");
+        if (opts.logtail !== undefined) {
+            if (!opts.logtail.logtail_token) {
+                throw new Error("Error in creating logger: logtail token is required for logtail log type");
             }
-            params.logtail_token = opts.logtail_token;
         }
 
-        this.configure(loglevel || "debug", transports, params);
+        this.configure(opts);
 
-        if (transports.indexOf('file') > -1) {
-            this.logger.info("logfile: " + params.logpath);
+        if (opts.file) {
+            this.logger.info("logfile: " + opts.file.logfile_path);
         }
     }
 }
