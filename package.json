@@ -1,6 +1,6 @@
 {
   "name": "streembit-util",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "description": "Streembit utility modules",
   "main": "index.js",
   "license": "SEE LICENSE IN LICENSE",
@@ -10,6 +10,8 @@
   },
   "author": "Zovolt Ltd, UK <tzpardi@streembit.com>",
   "dependencies": {
+    "@logtail/node": "^0.5.0",
+    "@logtail/winston": "^0.5.0",
     "chai": "^4.2.0",
     "mocha": "^10.2.0",
     "winston": "^3.3.3"
@@ -24,7 +26,6 @@
   "directories": {
     "test": "test"
   },
-  "devDependencies": {},
   "keywords": [
     "streembit"
   ]

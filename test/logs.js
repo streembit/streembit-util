@@ -30,10 +30,10 @@ describe("Logger", function () {
 
     describe("init()", function () {
         it("init() should execute", function () {
-            logger.init();
+            logger.init("debug", ["file"]);
         });
 
-        it("Log file 'streembit.log' should exists after init", function () {   
+        it("Log file 'streembit.log' should exists for transport type 'file'", function () {   
             setTimeout(
                 () => {
                     var wdir = process.cwd();

@@ -73,7 +73,10 @@ obj/
 *.njsproj
 *.suo
 *.sln
+logs
+logs/*
 logs/*.log
+
 
 data/*.json
 
@@ -82,13 +85,10 @@ data/*.json
 *.db
 *.vsidx
 
-/.vs/config/applicationhost.config
-
 config.json
 /typings
 /.idea/
 /data/account.json
-.vs/streembit-util/v15/Browse.VC.db
 /config _copy.json
 
 
@@ -99,6 +99,6 @@ streembit-util.njsproj.user
 temp.js*
 launch.json*
 
-.vs/streembit-util/config/applicationhost.config
+.vs/*
 testapp.js
 package-lock.json

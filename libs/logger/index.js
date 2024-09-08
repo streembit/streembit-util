@@ -27,7 +27,8 @@ const fs = require('fs');
 const winston = require('winston');
 const { createLogger, transports } = require('winston');
 const util = require('util');
-
+const { Logtail } = require("@logtail/node");
+const { LogtailTransport } = require("@logtail/winston"); 
 
 let singleton = Symbol();
 let singletonEnforcer = Symbol();
@@ -39,6 +40,8 @@ class Logger {
         }
 
         this.logger = 0;
+        this.islogtail = false;
+        this.logtail = undefined;
     }
 
     static get instance() {
@@ -54,6 +57,10 @@ class Logger {
         }
         else {
             this.logger.log(level, msg);
+            if (this.islogtail && this.logtail !== undefined) {
+                // Ensure that all logs are sent to Logtail
+                this.logtail.flush();
+            }
         }
     }
 
@@ -159,8 +166,10 @@ class Logger {
         }
     }
 
-    configure(loglevel, logpath, excpath, trans) {
+    configure(loglevel, trans, params) {
+
         var winston_transports = [];
+
         if (trans.indexOf('console') > -1) {
             winston_transports.push(
                 new transports.Console({
@@ -169,52 +178,73 @@ class Logger {
                     format: winston.format.combine(
                         winston.format.colorize(),
                         winston.format.simple()
-                    )
+                    ),
+                    handleExceptions: true
                 })
             );
         }
 
         if (trans.indexOf('file') > -1) {
-            winston_transports.push(
-                new transports.File ({
-                    filename: logpath,
-                    level: loglevel,
-                    maxsize: 4096000, // 4MB
-                    maxFiles: 100,
-                    tailable: true,
-                    colorize: false,
-                    format: winston.format.json()
-                })
-            );
+            if (!params || !params.logpath) {
+                console.log("Failed to initialize file log. Error: the params.logpath parameter is required.")
+            }
+            else {
+                winston_transports.push(
+                    new transports.File({
+                        filename: params.logpath,
+                        level: loglevel,
+                        maxsize: 4096000, // 4MB
+                        maxFiles: 100,
+                        tailable: true,
+                        colorize: false,
+                        format: winston.format.json(),
+                        handleExceptions: true
+                    })
+                );
+            }            
+        }
+
+        if (trans.indexOf('logtail') > -1) {
+            if (!params.logtail_token) {
+                console.log("Failed to initialize file log. Error: logtail requires a token.")
+            }
+            else {
+                // Create a Logtail client
+                this.logtail = new Logtail(params.logtail_token);
+                const logtail_trans = new LogtailTransport(this.logtail);
+                winston_transports.push(
+                    logtail_trans 
+                );
+                // set the logtail flag
+                this.islogtail = true;
+            }            
         }
 
         var logconfig = {
-            exitOnError: false,
             transports: winston_transports,
-            exceptionHandlers: [
-                new transports.Console()
-            ]
+            exitOnError: false
         };
 
-        if (trans.indexOf('file') > -1) {
-            logconfig.exceptionHandlers.push(new transports.File({ filename: excpath })); 
-        }
+        //if (trans.indexOf('file') > -1) {
+        //    logconfig.exceptionHandlers.push(new transports.File({ filename: excpath })); 
+        //}
 
         this.logger = createLogger(logconfig);
     }
 
-    init(loglevel, logdir, transport = ['console']) {
+    init(loglevel, transports = ['console'], opts = {}) {
 
-        var logfile = null;
-        var exception_path = null;
+        var params = {};
 
-        if (transport.indexOf('file') > -1) {
-            if (!logdir) {
+        if (transports.indexOf('file') > -1) {
+            var logdir;
+            if (!opts.logdir) {
                 var wdir = process.cwd();
                 logdir = path.join(wdir, "logs");
             }
-            // get logfile path
-            logfile = path.join(logdir, 'streembit.log');
+            else {
+                logdir = opts.logdir;
+            }
 
             // create logs directory, if not exists
             try {
@@ -226,23 +256,49 @@ class Logger {
                 return console.log("Error in creating logs directory: " + e.message);
             }
 
-            // rename log file, if exists
+
+            // test if we can write to the logdir
             try {
-                if (fs.existsSync(logfile)) {
-                    fs.renameSync(logfile, path.join(logdir, "/streembit_" + Date.now() + ".log"));
+                var testfile_path = path.join(logdir, "temp.txt");
+                if (fs.existsSync(testfile_path)) {
+                    fs.rmSync(testfile_path);
+                }
+                fs.writeFileSync(testfile_path, 'testing the path');
+                //remove the test file
+                fs.rmSync(testfile_path);
+            }
+            catch (e) {
+                return console.log("Error in writing to the logs directory: " + e.message);
+            }
+            
+            var logf = opts.logfile  || 'streembit.log';
+            // get the logfile path
+            var logfile_path = path.join(logdir, logf);            
+
+            // rename the log file, if it exists
+            try {
+                if (fs.existsSync(logfile_path)) {
+                    fs.renameSync(logfile_path, path.join(logdir, `/${Date.now()}_${logf}`));
                 }
             }
             catch (e) {
                 return console.log("Error in renaming log file: " + e.message);
             }
 
-            exception_path = path.join(logdir, 'exception.log');
+            params.logpath = logfile_path;
         }
 
-        this.configure(loglevel || "debug", logfile, exception_path, transport);
+        if (transports.indexOf('logtail') > -1) {
+            if (!opts.logtail_token) {
+                return console.log("Error in creating logger: logtail token is required for logtail log type");
+            }
+            params.logtail_token = opts.logtail_token;
+        }
 
-        if (transport.indexOf('file') > -1) {
-            this.logger.info("logfile: " + logfile);
+        this.configure(loglevel || "debug", transports, params);
+
+        if (transports.indexOf('file') > -1) {
+            this.logger.info("logfile: " + params.logpath);
         }
     }
 }
