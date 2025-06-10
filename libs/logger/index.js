@@ -209,7 +209,13 @@ class Logger {
             }
             
             // Create a Logtail client
-            this.logtail = new Logtail(params.logtail.logtail_token);
+            let options = null;
+            if (params.logtail.endpoint) {
+                options = {
+                    endpoint: params.logtail.endpoint
+                };
+            }
+            this.logtail = new Logtail(params.logtail.logtail_token, options);
             const logtail_trans = new LogtailTransport(this.logtail, { level: params.loglevel });
             winston_transports.push(
                 logtail_trans 
