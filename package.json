@@ -1,6 +1,6 @@
 {
   "name": "streembit-util",
-  "version": "1.5.7",
+  "version": "1.5.9",
   "description": "Streembit utility modules",
   "main": "index.js",
   "license": "SEE LICENSE IN LICENSE",
