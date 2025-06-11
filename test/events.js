@@ -19,206 +19,216 @@ Copyright (C) 2017 The Streembit software development team
 
 */
 
-
 const assert = require('assert');
-const expect = require("chai").expect;
 const events = require("../index").events;
 const EventEmitter = require('events');
+const { describe, it, test } = require('node:test');
 
-describe("Event handler", function () {
-    describe("Event handler instance", function () {
-        it("instance return an EventEmitter object", function () {
+describe("Event handler", () => {
+    describe("Event handler instance", () => {
+        test("instance return an EventEmitter object", () => {
             assert.equal(true, events instanceof EventEmitter );
         });
     });
 
-    describe("Event types", function () {
-        it("event type ONAPPINIT exists", function () {
+    describe("Event types", () => {
+        test("event type ONAPPINIT exists", () => {
             assert.equal(true, (typeof events.ONAPPINIT === 'string' && events.ONAPPINIT.length > 0) );
         });
 
-        it("event type ONAPPEVENT exists", function () {
+        test("event type ONAPPEVENT exists", () => {
             assert.equal(true, (typeof events.ONAPPEVENT === 'string' && events.ONAPPEVENT.length > 0));
         });
 
-        it("event type ONAPPLOG exists", function () {
+        test("event type ONAPPLOG exists", () => {
             assert.equal(true, (typeof events.ONAPPLOG === 'string' && events.ONAPPLOG.length > 0));
         });
 
-        it("event type ONTASKINIT exists", function () {
+        test("event type ONTASKINIT exists", () => {
             assert.equal(true, (typeof events.ONTASKINIT === 'string' && events.ONTASKINIT.length > 0));
         });
 
-        it("event type ONIOTEVENT exists", function () {
+        test("event type ONIOTEVENT exists", () => {
             assert.equal(true, (typeof events.ONIOTEVENT === 'string' && events.ONIOTEVENT.length > 0));
         });
 
-        it("event type ONBCEVENT exists", function () {
+        test("event type ONBCEVENT exists", () => {
             assert.equal(true, (typeof events.ONBCEVENT === 'string' && events.ONBCEVENT.length > 0));
         });
 
-        it("event type ONPEERMSG exists", function () {
+        test("event type ONPEERMSG exists", () => {
             assert.equal(true, (typeof events.ONPEERMSG === 'string' && events.ONPEERMSG.length > 0));
         });
 
-        it("event type ONBCEVENT exists", function () {
+        test("event type ONBCEVENT exists", () => {
             assert.equal(true, (typeof events.ONBCEVENT === 'string' && events.ONBCEVENT.length > 0));
         });
 
-        it("event type ONERROREVENT exists", function () {
+        test("event type ONERROREVENT exists", () => {
             assert.equal(true, (typeof events.ONERROREVENT === 'string' && events.ONERROREVENT.length > 0));
         });
     });
 
-    describe("Event functions", function () {
-        it("appinit should return true", function () {
+    describe("Event functions", () => {
+        test("appinit should return true", () => {
             let result = events.appinit();
-            expect(result).to.equal(true);
+            assert.strictEqual(result, true);
         });
 
-        it("appevent should return true", function () {
+        test("appevent should return true", () => {
             let result = events.appevent();
-            expect(result).to.equal(true);
+            assert.strictEqual(result, true);
         });
 
-        it("register should throw exception with invalid event name", function () {
-            function reg(){
+        test("register should throw exception with invalid event name", () => {
+            assert.throws(() => {
                 events.register("0");
-            }            
-            expect(reg).to.throw(); 
-        });
-
-        it("register should throw exception with invalid event callback", function () {
-            function reg(){
-                events.register(events.ONPEERMSG);
-            }
-            expect(reg).to.throw(); 
-        });
-
-        it("register should return true", function () {
-            let result = events.register(events.ONPEERMSG, function(payload){
             });
-            expect(result).to.equal(true);
         });
 
-        it("taskinit should return true", function () {
+        test("register should throw exception with invalid event callback", () => {
+            assert.throws(() => {
+                events.register(events.ONPEERMSG);
+            });
+        });
+
+        test("register should return true", () => {
+            let result = events.register(events.ONPEERMSG, function(payload){});
+            assert.strictEqual(result, true);
+        });
+
+        test("taskinit should return true", () => {
             let result = events.taskinit();
-            expect(result).to.equal(true);
+            assert.strictEqual(result, true);
         });
 
-        it("peermsg should return true", function () {
+        test("peermsg should return true", () => {
             let result = events.peermsg();
-            expect(result).to.equal(true);
+            assert.strictEqual(result, true);
         });
 
-        it("iotmsg should return true", function () {
+        test("iotmsg should return true", () => {
             let result = events.iotmsg();
-            expect(result).to.equal(true);
+            assert.strictEqual(result, true);
         });
 
-        it("bcmsg should return true", function () {
+        test("bcmsg should return true", () => {
             let result = events.bcmsg();
-            expect(result).to.equal(true);
+            assert.strictEqual(result, true);
         });
 
-        it("errorevent should return true", function () {
+        test("errorevent should return true", () => {
             let result = events.errorevent();
-            expect(result).to.equal(true);
+            assert.strictEqual(result, true);
         });
 
-        it("onappinit should call an event listener", function (done) {
-            events.register(
-                events.ONAPPINIT,
-                (result) => {
-                    expect(result).to.equal(true);
-                    done();
-                }
-            );
-            events.appinit();            
+        test("onappinit should call an event listener", async (t) => {
+            await new Promise((resolve) => {
+                events.register(
+                    events.ONAPPINIT,
+                    (result) => {
+                        assert.strictEqual(result, true);
+                        resolve();
+                    }
+                );
+                events.appinit();
+            });
         });
 
-        it("onappevent should call an event listener and return the object that 'num' value is 1", function (done) {
-            let data = {num: 1}
-            events.register(
-                events.ONAPPEVENT,
-                (result) => {
-                    expect(result.num).to.equal(1);
-                    done();
-                }
-            );
-            events.appevent(data);
+        test("onappevent should call an event listener and return the object that 'num' value is 1", async (t) => {
+            let data = {num: 1};
+            await new Promise((resolve) => {
+                events.register(
+                    events.ONAPPEVENT,
+                    (result) => {
+                        assert.strictEqual(result.num, 1);
+                        resolve();
+                    }
+                );
+                events.appevent(data);
+            });
         });
 
-        it("onpeermsg should call an event listener", function (done) {
+        test("onpeermsg should call an event listener", async (t) => {
             let payload = "1";
             let request = "req";
             let response = "resp";
             let id = 1;
             let completefn = (id) =>{
                 assert.equal(true, id === 1);
-            }
+            };
 
-            events.register(
-                events.ONPEERMSG,
-                (data, req, resp, msgid, compfn) => {
-                    compfn(msgid);
-                    assert.equal(true, (data === payload && request === req && resp === response && msgid === id));
-                    done();
-                }
-            );
-            events.peermsg(payload, request, response, id, completefn);            
+            await new Promise((resolve) => {
+                events.register(
+                    events.ONPEERMSG,
+                    (data, req, resp, msgid, compfn) => {
+                        compfn(msgid);
+                        assert.equal(true, (data === payload && request === req && resp === response && msgid === id));
+                        resolve();
+                    }
+                );
+                events.peermsg(payload, request, response, id, completefn);
+            });
         });
 
-        it("ontaskinit should call an event listener", function (done) {
-            let t = "T";
+        test("ontaskinit should call an event listener", async (t) => {
+            let tsk = "T";
             let payload = "1";
-            events.register(
-                events.ONTASKINIT,
-                (task, data) => {
-                    assert.equal(true, (data === payload && task === t));
-                    done();
-                }
-            );
-            events.taskinit(t, payload);            
+            await new Promise((resolve) => {
+                events.register(
+                    events.ONTASKINIT,
+                    (task, data) => {
+                        assert.equal(true, (data === payload && task === tsk));
+                        resolve();
+                    }
+                );
+                events.taskinit(tsk, payload);
+            });
         });
 
-        it("oniotmsg should call an event listener", function (done) {
+        test("oniotmsg should call an event listener", async (t) => {
             let payload = "P";
             let fn = function(){};
-            events.register(
-                events.ONIOTEVENT,
-                (data, cb) => {
-                    assert.equal(true, (data === payload && cb === fn));
-                    done();
-                }
-            );
-            events.iotmsg( payload, fn);            
+            await new Promise((resolve) => {
+                events.register(
+                    events.ONIOTEVENT,
+                    (data, cb) => {
+                        assert.equal(true, (data === payload && cb === fn));
+                        resolve();
+                    }
+                );
+                events.iotmsg(payload, fn);
+            });
         });
 
-        it("onbcmsg should call an event listener", function (done) {
+        test("onbcmsg should call an event listener", async (t) => {
             let payload = "BC";
             let fn = function(){};
-            events.register(
-                events.ONBCEVENT,
-                (data, cb) => {
-                    assert.equal(true, (data === payload && cb === fn));
-                    done();
-                }
-            );
-            events.bcmsg( payload, fn);            
+            await new Promise((resolve) => {
+                events.register(
+                    events.ONBCEVENT,
+                    (data, cb) => {
+                        assert.equal(true, (data === payload && cb === fn));
+                        resolve();
+                    }
+                );
+                events.bcmsg(payload, fn);
+            });
         });
 
-        it("errorevent should call an event listener", function (done) {
+        test("errorevent should call an event listener", async (t) => {
             let err = new Error("test error");
-            let payload = {data: 1} ;
-            events.register(
-                events.ONERROREVENT,
-                (e, p) => {
-                    assert.equal(true, (e.message === "test error" && p.data === 1));
-                    done();
-                }
-            );
-            events.errorevent(err, payload);
+            let payload = {data: 1};
+            await new Promise((resolve) => {
+                events.register(
+                    events.ONERROREVENT,
+                    (e, p) => {
+                        assert.equal(true, (e.message === "test error" && p.data === 1));
+                        resolve();
+                    }
+                );
+                events.errorevent(err, payload);
+            });
         });
 
     });
